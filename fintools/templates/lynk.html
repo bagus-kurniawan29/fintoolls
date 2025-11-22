@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@FinTools.id - Link Bio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#059669',
+                        secondary: '#10b981',
+                        dark: '#064e3b',
+                        accent: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen relative overflow-x-hidden">
+
+    <!-- Dekorasi Background (Konsisten dengan Halaman Utama) -->
+    <div class="fixed top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-50 -z-10"></div>
+    <div class="fixed bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-yellow-50 rounded-full blur-3xl opacity-50 -z-10"></div>
+
+    <div class="max-w-md mx-auto w-full py-12 px-4">
+
+        <!-- HEADER PROFIL -->
+        <div class="flex flex-col items-center mb-10 text-center">
+            <!-- Foto Profil -->
+            <div class="w-28 h-28 rounded-full p-1 border-2 border-dashed border-primary mb-4 relative">
+                <div class="w-full h-full rounded-full overflow-hidden shadow-lg bg-white">
+                    <!-- Ganti URL ini dengan foto profil asli jika ada -->
+                    <img src="https://ui-avatars.com/api/?name=Fin+Tools&background=059669&color=fff&size=128" alt="Profile" class="w-full h-full object-cover">
+                </div>
+                <!-- Verified Badge -->
+                <div class="absolute bottom-0 right-0 bg-blue-500 text-white text-xs rounded-full w-7 h-7 flex items-center justify-center border-2 border-white">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">@FinTools.id</h1>
+            <p class="text-gray-500 text-sm mt-2 leading-relaxed max-w-xs">
+                Solusi Cerdas Keuangan & Bisnis Digital.<br>
+                <span class="text-primary font-semibold">#CerdasFinansial</span>
+            </p>
+
+            <!-- Sosmed Icons -->
+            <div class="flex justify-center gap-4 mt-5">
+                <a href="#" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white hover:shadow-md transition duration-300">
+                    <i class="fa-brands fa-instagram text-lg"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white hover:shadow-md transition duration-300">
+                    <i class="fa-brands fa-tiktok text-lg"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white hover:shadow-md transition duration-300">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                </a>
+                <a href="{% url 'discussion' %}" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white hover:shadow-md transition duration-300" title="Komunitas">
+                    <i class="fa-solid fa-users text-lg"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- LIST PRODUK (STACK) -->
+        <div class="space-y-4 w-full">
+            
+            {% for product in products %}
+            <a href="{% url 'checkout' product.pk %}" target="_blank" class="group block w-full relative overflow-hidden rounded-2xl bg-white hover:bg-gray-50 text-gray-900 py-4 px-5 transition-all duration-300 shadow-sm hover:shadow-lg border border-gray-100 hover:border-primary/30 transform hover:-translate-y-1">
+                
+                <div class="flex items-center justify-between relative z-10">
+                    <!-- Bagian Kiri: Ikon & Nama -->
+                    <div class="flex items-center gap-4 overflow-hidden">
+                        
+                        <!-- Thumbnail Produk -->
+                        <div class="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 group-hover:border-primary transition">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-primary/50">
+                                    <i class="fa-solid fa-image"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Teks -->
+                        <div class="flex-grow min-w-0 text-left">
+                            <h3 class="font-bold text-sm text-gray-800 group-hover:text-primary transition truncate pr-2">{{ product.name }}</h3>
+                            <p class="text-xs text-gray-500 truncate">{{ product.category.name }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Bagian Kanan: Harga / Diskon -->
+                    <div class="flex-shrink-0 flex flex-col items-end pl-2">
+                         {% if product.discount_price %}
+                            <span class="text-xs text-gray-400 line-through decoration-red-400">Rp {{ product.price|floatformat:0 }}</span>
+                            <span class="font-bold text-sm text-primary bg-green-50 px-2 py-0.5 rounded-md border border-green-100">
+                                Rp {{ product.discount_price|floatformat:0 }}
+                            </span>
+                        {% else %}
+                            <span class="font-bold text-sm text-primary bg-green-50 px-2 py-0.5 rounded-md border border-green-100">
+                                Rp {{ product.price|floatformat:0 }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                <i class="fa-solid fa-box-open text-3xl text-gray-300 mb-2"></i>
+                <p class="text-gray-500 text-sm">Belum ada produk.</p>
+            </div>
+            {% endfor %}
+
+            <!-- Link Website Utama -->
+            <a href="{% url 'home' %}" class="block w-full mt-8 py-4 rounded-2xl bg-gray-900 hover:bg-primary text-white text-center font-bold transition-all duration-300 shadow-lg shadow-gray-300 hover:shadow-green-200 transform hover:-translate-y-1">
+                <i class="fa-solid fa-globe mr-2"></i> Kunjungi Website Utama
+            </a>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="mt-12 text-center opacity-60 hover:opacity-100 transition">
+            <div class="inline-flex items-center gap-2 text-xs font-medium text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                <i class="fa-solid fa-bolt text-accent"></i> Powered by FinTools
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+        <h2 class="text-xl font-bold text-gray-800 animate-pulse">Fin<span class="text-emerald-600">Tools</span></h2>
+    </div>
+    <script>
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+        });
+    </script>
+</body>
+</html>

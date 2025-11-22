@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diskusi Komunitas - FinTools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 font-sans pb-20">
+
+    <!-- Navbar Simpel -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="{% url 'home' %}" class="text-gray-500 hover:text-gray-900"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+            <span class="font-bold text-gray-800">Komunitas FinTools</span>
+            <div class="w-6"></div>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto mt-6 px-4">
+        
+        <!-- INPUT BOX UTAMA -->
+        <div class="bg-white rounded-xl shadow p-4 mb-6">
+            <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="flex-grow">
+                    <!-- PENTING: enctype untuk upload gambar -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            {{ form.name }}
+                        </div>
+                        <div>
+                            {{ form.text }}
+                        </div>
+                        
+                        <!-- Baris Tombol Bawah -->
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
+                            <!-- Tombol Upload Gambar -->
+                            <label class="cursor-pointer text-gray-500 hover:text-blue-600 flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-image text-xl"></i>
+                                <span class="hidden sm:inline">Tambahkan Foto</span>
+                                <!-- Input file disembunyikan, dipicu oleh label -->
+                                <input type="file" name="image" class="hidden" onchange="document.getElementById('fileName').innerText = this.files[0].name">
+                            </label>
+                            <span id="fileName" class="text-xs text-green-600 truncate max-w-[100px]"></span>
+
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-1.5 rounded-full font-bold text-sm hover:bg-blue-700 transition shadow-md">
+                                Posting
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEED KOMENTAR -->
+        <div class="space-y-4">
+            {% for comment in comments %}
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="flex items-start gap-3">
+                    <!-- Avatar -->
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm">
+                        {{ comment.name|slice:":1" }}
+                    </div>
+                    
+                    <!-- Konten Utama -->
+                    <div class="flex-grow min-w-0">
+                        <div class="bg-gray-100 rounded-2xl px-4 py-3 inline-block min-w-[200px]">
+                            <h4 class="font-bold text-sm text-gray-900">{{ comment.name }}</h4>
+                            <p class="text-gray-800 text-sm mt-1 whitespace-pre-wrap">{{ comment.text }}</p>
+                        </div>
+
+                        <!-- Tampilkan Gambar Jika Ada -->
+                        {% if comment.image %}
+                        <div class="mt-3">
+                            <img src="{{ comment.image.url }}" class="rounded-lg max-h-60 border border-gray-200 object-cover">
+                        </div>
+                        {% endif %}
+
+                        <!-- Tombol Interaksi (Like & Reply) -->
+                        <div class="flex gap-6 mt-2 ml-2 text-xs text-gray-500 font-medium items-center">
+                            <span>{{ comment.created_at|timesince }} yang lalu</span>
+                            
+                            <!-- Tombol Like -->
+                            <a href="{% url 'like_comment' comment.id %}" class="flex items-center gap-1 hover:text-blue-600 transition group">
+                                <i class="fa-solid fa-thumbs-up group-hover:scale-110"></i> 
+                                {{ comment.likes }} Suka
+                            </a>
+
+                            <!-- Tombol Reply (Pemicu JS) -->
+                            <button onclick="toggleReply('reply-{{ comment.id }}')" class="hover:text-blue-600 transition">
+                                Balas
+                            </button>
+                        </div>
+
+                        <!-- LOOPING BALASAN (REPLIES) -->
+                        {% if comment.replies.all %}
+                        <div class="mt-3 pl-4 border-l-2 border-gray-200 space-y-3">
+                            {% for reply in comment.replies.all %}
+                            <div class="flex items-start gap-2">
+                                <div class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-[10px] text-gray-600 font-bold">
+                                    {{ reply.name|slice:":1" }}
+                                </div>
+                                <div class="bg-gray-50 rounded-xl px-3 py-2">
+                                    <h5 class="font-bold text-xs text-gray-900">{{ reply.name }}</h5>
+                                    <p class="text-gray-700 text-xs">{{ reply.text }}</p>
+                                    {% if reply.image %}
+                                        <img src="{{ reply.image.url }}" class="mt-2 rounded max-h-32">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- FORM BALASAN (Tersembunyi) -->
+                        <div id="reply-{{ comment.id }}" class="hidden mt-3 pl-4 border-l-2 border-gray-200">
+                            <form method="POST" enctype="multipart/form-data" class="flex gap-2 items-start">
+                                {% csrf_token %}
+                                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                
+                                <div class="flex-grow space-y-2">
+                                    <input type="text" name="name" placeholder="Nama kamu" class="w-full px-3 py-1 border rounded-lg text-xs focus:outline-none focus:border-blue-500" required>
+                                    <textarea name="text" rows="1" placeholder="Tulis balasan..." class="w-full px-3 py-1 border rounded-lg text-xs focus:outline-none focus:border-blue-500" required></textarea>
+                                    <input type="file" name="image" class="text-xs text-gray-400">
+                                </div>
+                                <button type="submit" class="bg-gray-800 text-white p-2 rounded-full hover:bg-black transition">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-10 text-gray-400">
+                <i class="fa-solid fa-comments text-4xl mb-2"></i>
+                <p>Belum ada diskusi. Jadilah yang pertama!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+     <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+        <h2 class="text-xl font-bold text-gray-800 animate-pulse">Fin<span class="text-emerald-600">Tools</span></h2>
+    </div>
+    <script>
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+        });
+    <!-- Script Javascript Sederhana untuk Toggle Reply -->
+        function toggleReply(id) {
+            var element = document.getElementById(id);
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
