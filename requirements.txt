@@ -51,3 +51,4 @@ tzdata==2025.2
 tzlocal==5.3.1
 virtualenv==20.35.3
 webencodings==0.5.1
+whitenoise==6.11.0
